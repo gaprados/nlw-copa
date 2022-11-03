@@ -3,6 +3,9 @@
     "name": "nlwcopamobile",
     "slug": "nlwcopamobile",
     "version": "1.0.0",
+    "expo": {
+      "scheme": "nlwcopamobile"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
