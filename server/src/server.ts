@@ -1,12 +1,8 @@
 import Fastify from "fastify";
 import cors from '@fastify/cors';
-import { PrismaClient } from '@prisma/client';
-import { z, ZodError } from 'zod';
-import ShordUniqueId from 'short-unique-id'
+import jwt from '@fastify/jwt'
 
-const prisma = new PrismaClient({
-  log: ['query'],
-});
+import { authRoutes, gameRoutes, guessRoutes, pollRoutes, userRoutes } from "./routes";
 
 async function bootstrap() {
   const fastify = Fastify({
@@ -14,49 +10,15 @@ async function bootstrap() {
   });
 
   await fastify.register(cors, { origin: true });
+  await fastify.register(jwt, {
+    secret: process.env.JWT_SECRET ?? ''
+  });
 
-  fastify.get("/polls/count", async () => {
-    const count = await prisma.poll.count()
-    return { count }
-  })
-
-  fastify.get("/users/count", async () => {
-    const count = await prisma.user.count()
-    return { count }
-  })
-
-  fastify.get("/guesses/count", async () => {
-    const count = await prisma.guess.count()
-    return { count }
-  })
-
-  fastify.post("/polls", async (request, reply) => {
-    const createpollBody = z.object({
-      title: z.string(),
-    })
-
-    try {
-      const { title } = createpollBody.parse(request.body);
-
-      const generate = new ShordUniqueId({ length: 6 })
-
-      const code = String(generate()).toUpperCase()
-
-      await prisma.poll.create({
-        data: {
-          title,
-          code
-        }
-      })
-
-      return reply.status(201).send({ code })
-    } catch (err) {
-      if (err instanceof ZodError) {
-        const errorMessage = JSON.parse(err.message)[0];
-        return reply.status(400).send({ error: errorMessage.message })
-      }
-    }
-  })
+  await fastify.register(authRoutes);
+  await fastify.register(gameRoutes);
+  await fastify.register(guessRoutes);
+  await fastify.register(pollRoutes);
+  await fastify.register(userRoutes);
 
   await fastify.listen({ port: 3333, host: '0.0.0.0' });
 }
