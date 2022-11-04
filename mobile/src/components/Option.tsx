@@ -2,7 +2,7 @@ import { Center, Text, Pressable, IPressableProps } from 'native-base';
 
 interface Props extends IPressableProps {
   title: string;
-  isSelected: boolean;
+  isSelected?: boolean;
 }
 
 export function Option({ title, isSelected = false, ...rest }: Props) {
